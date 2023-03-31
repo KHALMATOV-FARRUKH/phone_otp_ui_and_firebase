@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:phone_otp_ui_and_firebase/phone.dart';
 import 'package:pinput/pinput.dart';
 
 class MyOtp extends StatefulWidget {
@@ -9,6 +11,9 @@ class MyOtp extends StatefulWidget {
 }
 
 class _MyOtpState extends State<MyOtp> {
+
+  final FirebaseAuth auth = FirebaseAuth.instance;
+
   @override
   Widget build(BuildContext context) {
     // pinpup=====================================
@@ -36,6 +41,8 @@ class _MyOtpState extends State<MyOtp> {
       ),
     );
 
+
+    var code="";
     // ==========================================
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -88,6 +95,9 @@ class _MyOtpState extends State<MyOtp> {
                 length: 6,
                 // pinputAutovalidateMode: PinputAutovalidateMode.onSubmit,
                 showCursor: true,
+                onChanged: (value){
+                  code=value;
+                },
                 // onCompleted: (pin) => print(pin),
               ),
               // ==================================================
@@ -96,7 +106,18 @@ class _MyOtpState extends State<MyOtp> {
                 height: 45,
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    try{
+                      PhoneAuthCredential credential = PhoneAuthProvider.credential(verificationId: MyPhone.verify, smsCode: code);
+
+                      // Sign the user in (or link) with the credential
+                      await auth.signInWithCredential(credential);
+                      Navigator.pushNamedAndRemoveUntil(context, "home", (route) => false);
+                    }catch(e){
+                      print("Wrong OTP");
+                    }
+
+                  },
                   child: Text("Verify phone number"),
                   style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green.shade600,
